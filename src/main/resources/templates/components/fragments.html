@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+
+<th:block th:fragment="game-updates">
+    <div th:replace="~{components/fragments :: error-message(oob=true)}"></div>
+    <div th:replace="~{components/fragments :: panel-orange(oob=true)}"></div>
+    <div th:replace="~{components/fragments :: board}"></div>
+    <div th:replace="~{components/fragments :: panel-cyan(oob=true)}"></div>
+</th:block>
+
+<div th:fragment="error-message" id="error-container" th:attr="hx-swap-oob=${oob != null} ? 'true' : null"
+     style="margin-bottom: 1rem;">
+
+    <div class="notification tron-error py-2 px-4 has-text-centered"
+         th:style="${state.errorMessage != null} ? 'opacity: 1; margin: 0; transition: opacity 0.3s ease;' : 'opacity: 0; margin: 0; pointer-events: none;'">
+        <span class="icon"><i class="fas fa-exclamation-triangle"></i></span>
+        <strong th:text="${state.errorMessage != null ? state.errorMessage : 'SISTEMA OK'}">Error</strong>
+    </div>
+
+</div>
+
+<!-- Panel Naranja (Programas) -->
+<div th:fragment="panel-orange" id="panel-orange" class="player-panel panel-orange mb-4"
+     th:classappend="${state.currentTurn == 'Programas'} ? 'active' : ''"
+     th:attr="hx-swap-oob=${oob != null} ? 'true' : null">
+
+    <div class="is-flex is-flex-direction-column is-align-items-flex-start">
+        <span><span class="is-size-4"></span>Programas<span th:if="${state.currentTurn == 'Programas'}" class="tag is-black is-rounded is-size-6" style="border: 1px solid var(--tron-orange); color: var(--tron-orange);background: transparent;" >PROCESANDO...</span>
+</span>
+        <!-- Fichas capturadas por los Programas (Mostrarán brillo Cian porque son de los Usuarios) -->
+        <div style="min-height: 30px; display: flex; gap: 5px; align-items: center; margin-top: 5px;">
+            <span th:each="p : ${state.capturedByProgramas}" th:text="${p}" class="piece white is-size-5"></span>
+        </div>
+    </div>
+
+</div>
+
+<!-- Tablero -->
+<div th:fragment="board" class="chess-board" id="main-chess-board"
+     th:classappend="${state.currentTurn == 'Usuarios'} ? 'turn-cyan' : 'turn-orange'">
+
+    <th:block th:each="row : ${#numbers.sequence(0, 7)}">
+        <th:block th:each="col : ${#numbers.sequence(0, 7)}">
+
+            <div class="square"
+                 th:classappend="${((row + col) % 2 == 0 ? 'light ' : 'dark ') + (state.selectedRow == row and state.selectedCol == col ? 'selected' : '')}"
+                 hx-post="/api/match/move"
+                 th:attr="hx-vals='{&quot;row&quot;:' + ${row} + ',&quot;col&quot;:' + ${col} + '}'"
+                 hx-target="#main-chess-board"
+                 hx-swap="outerHTML">
+
+                <span th:if="${state.board[row][col] != null}"
+                      class="piece"
+                      th:classappend="${state.isWhite(state.board[row][col]) ? 'white' : 'black'}"
+                      th:text="${state.board[row][col]}">
+                </span>
+            </div>
+
+        </th:block>
+    </th:block>
+</div>
+
+<!-- Panel Cian (Usuarios) -->
+<div th:fragment="panel-cyan" id="panel-cyan" class="player-panel panel-cyan mt-4"
+     th:classappend="${state.currentTurn == 'Usuarios'} ? 'active' : ''"
+     th:attr="hx-swap-oob=${oob != null} ? 'true' : null">
+
+    <div class="is-flex is-flex-direction-column is-align-items-flex-start">
+        <span><span class="is-size-4"></span>Usuarios<span th:if="${state.currentTurn == 'Usuarios'}" class="tag is-black is-rounded is-size-6" style="border: 1px solid var(--tron-cyan); color: var(--tron-cyan); background: transparent;">PROCESANDO...</span>
+</span>
+        <!-- Fichas capturadas por los Usuarios (Mostrarán brillo Naranja porque son de los Programas) -->
+        <div style="min-height: 30px; display: flex; gap: 5px; align-items: center; margin-top: 5px;">
+            <span th:each="p : ${state.capturedByUsuarios}" th:text="${p}" class="piece black is-size-5"></span>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

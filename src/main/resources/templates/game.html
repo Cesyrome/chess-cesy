@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRON Chess | The Grid</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <!-- FontAwesome para el ícono de música -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/styles.css}" href="/css/styles.css">
+    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+</head>
+<body>
+
+<!-- VIDEO DE FONDO BORROSO -->
+<div class="video-bg-container">
+    <!-- Reemplaza "ruta/a/tu/video.mp4" con el enlace o archivo de tu preferencia -->
+    <video autoplay loop muted playsinline class="blurry-video">
+        <source src="/media/tron.mp4" type="video/mp4">
+    </video>
+</div>
+
+<audio id="tron-audio-1">
+    <source src="/audio/tron1.mp3" type="audio/mpeg">
+</audio>
+<audio id="tron-audio-2" loop>
+    <source src="/audio/tron2.mp3" type="audio/mpeg">
+</audio>
+
+<section class="section is-flex is-flex-direction-column is-justify-content-center" style="min-height: 100vh;">
+    <!-- Agregamos la clase game-wrapper aquí -->
+    <div class="container game-wrapper" style="max-width: 700px;">
+        <!-- Contenedor de Errores (HTMX OOB) -->
+        <div id="error-container" style="min-height: 50px;">
+            <div th:replace="~{components/fragments :: error-message}"></div>
+        </div>
+        <!-- Controles Superiores (Música y Título) -->
+        <div class="is-flex is-justify-content-space-between is-align-items-center mb-5">
+            <h1 class="title is-3 has-text-white m-0" style="letter-spacing: 5px; text-shadow: 0 0 10px var(--tron-cyan);">THE TRON CHESS</h1>
+
+            <!-- Botón de Música -->
+            <button class="button is-small is-rounded" onclick="toggleAudio()"
+                    style="border-color: var(--tron-cyan); color: var(--tron-cyan); background: transparent;">
+                <span class="icon"><i class="fas fa-music"></i></span>
+                <span id="audio-text">OFF</span>
+            </button>
+            <button hx-post="/api/match/reset"
+                    hx-target="#main-chess-board"
+                    hx-swap="outerHTML"
+                    class="button is-small is-rounded"
+                    style="border-color: var(--tron-orange); color: var(--tron-orange); background: transparent;">
+                <span class="icon"><i class="fas fa-power-off"></i></span>
+                <span>REBOOT SYSTEM</span>
+            </button>
+        </div>
+
+
+
+        <!-- Panel Superior: Programas (Negras) -->
+        <div th:replace="~{components/fragments :: panel-orange}"></div>
+
+        <!-- Tablero Central -->
+        <div th:replace="~{components/fragments :: board}"></div>
+
+        <!-- Panel Inferior: Usuarios (Blancas) -->
+        <div th:replace="~{components/fragments :: panel-cyan}"></div>
+
+    </div>
+</section>
+
+<script>
+    var audio1 = document.getElementById("tron-audio-1");
+    var audio2 = document.getElementById("tron-audio-2");
+    var isPlaying = false;
+
+    // Evento: Cuando el audio 1 termina, inicia el audio 2 automáticamente
+    audio1.addEventListener('ended', function() {
+        audio2.play();
+    });
+
+    function toggleAudio() {
+        var text = document.getElementById("audio-text");
+
+        if (!isPlaying) {
+            // Si el audio 1 no ha terminado, lo reproducimos. Si ya terminó, reproducimos el 2.
+            if (audio1.currentTime === 0 || !audio1.ended) {
+                audio1.play();
+            } else {
+                audio2.play();
+            }
+            text.innerText = "ON";
+            text.parentElement.style.boxShadow = "0 0 10px var(--tron-cyan)";
+            isPlaying = true;
+        } else {
+            // Pausamos ambos
+            audio1.pause();
+            audio2.pause();
+            text.innerText = "OFF";
+            text.parentElement.style.boxShadow = "none";
+            isPlaying = false;
+        }
+    }
+</script>
+</body>
+</html>
